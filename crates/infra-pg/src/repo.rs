@@ -205,11 +205,33 @@ impl LedgerRepo for PgLedgerRepo {
 
     async fn history(
         &self,
-        _account: AccountId,
-        _limit: u32,
+        account: AccountId,
+        limit: u32,
     ) -> Result<Vec<Entry>, LedgerError> {
-        // Implemented in the next commit (#17).
-        unimplemented!()
+        let rows = sqlx::query!(
+            r#"SELECT account_id,
+                      direction AS "direction: DbDirection",
+                      amount,
+                      currency  AS "currency: DbCurrency"
+               FROM entries
+               WHERE account_id = $1
+               ORDER BY id DESC
+               LIMIT $2"#,
+            account.as_uuid(),
+            i64::from(limit),
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(storage)?;
+
+        rows.into_iter()
+            .map(|r| {
+                let currency = r.currency.into();
+                let money = Money::new(r.amount, currency);
+                Entry::new(AccountId::new(r.account_id), r.direction.into(), money)
+                    .map_err(|e| storage(format!("inconsistent entries row: {e}")))
+            })
+            .collect()
     }
 }
 
