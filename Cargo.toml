@@ -5,7 +5,7 @@
 
 [workspace]
 resolver = "2"
-members = ["crates/domain", "crates/app", "crates/infra-pg"]
+members = ["crates/domain", "crates/app", "crates/infra-pg", "crates/ledger-svc"]
 
 # Centralised dependency versions. Each crate references these via
 # `dep = { workspace = true }` so we pin one version across the workspace.
@@ -28,6 +28,16 @@ sqlx = { version = "0.8", default-features = false, features = [
     "uuid",
 ] }
 tracing = { version = "0.1", default-features = false, features = ["std"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std"] }
+
+# gRPC stack (used by ledger-svc only).
+tonic = { version = "0.12", default-features = false, features = ["server", "channel", "codegen", "prost", "transport"] }
+prost = "0.13"
+prost-types = "0.13"
+tonic-build = { version = "0.12", default-features = false, features = ["prost", "transport"] }
+
+# Edge-of-the-binary error type.
+anyhow = "1"
 
 # Dev-only deps (property tests).
 proptest = "1"

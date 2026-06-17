@@ -1,0 +1,45 @@
+# gRPC server: composition root. Depends on everything because that's
+# what composition roots do — wires LedgerRepo + Clock + IdGen into a
+# tonic service.
+
+[package]
+name = "ledger-svc"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "ledgercore — gRPC server exposing the Ledger port"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger-svc"
+path = "src/main.rs"
+
+[dependencies]
+domain = { path = "../domain" }
+app = { path = "../app" }
+infra-pg = { path = "../infra-pg" }
+
+tonic = { workspace = true }
+prost = { workspace = true }
+prost-types = { workspace = true }
+
+tokio = { workspace = true }
+sqlx = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+
+rust_decimal = { workspace = true }
+time = { workspace = true }
+uuid = { workspace = true }
+
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+anyhow = { workspace = true }
+
+[build-dependencies]
+tonic-build = { workspace = true }
