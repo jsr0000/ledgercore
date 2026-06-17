@@ -7,5 +7,6 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-// Modules are introduced one at a time in subsequent commits, alongside the
-// types they define. See M0 design doc for the order.
+mod money;
+
+pub use money::{Currency, Money, MoneyError};
