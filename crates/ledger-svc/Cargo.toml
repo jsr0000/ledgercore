@@ -43,6 +43,7 @@ anyhow = { workspace = true }
 
 [dev-dependencies]
 rust_decimal_macros = "1"
+tokio-stream = { version = "0.1", features = ["net"] }
 
 [build-dependencies]
 tonic-build = { workspace = true }
