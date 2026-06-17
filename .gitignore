@@ -10,3 +10,5 @@ CLAUDE.md
 
 /docs
 
+# Local env (DATABASE_URL etc.)
+.env
