@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT a.id,\n                  a.balance,\n                  COALESCE(SUM(\n                    CASE\n                      WHEN a.kind = 'asset'     AND e.direction = 'debit'  THEN  e.amount\n                      WHEN a.kind = 'asset'     AND e.direction = 'credit' THEN -e.amount\n                      WHEN a.kind = 'liability' AND e.direction = 'credit' THEN  e.amount\n                      WHEN a.kind = 'liability' AND e.direction = 'debit'  THEN -e.amount\n                    END\n                  ), 0) AS \"computed!\"\n           FROM accounts a\n           LEFT JOIN entries e ON e.account_id = a.id\n           GROUP BY a.id\n           ORDER BY a.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "balance",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 2,
+        "name": "computed!",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "297ef0c4d2550b8e8430f01a2ef8ae8370076acb8890766d77394f20b798186f"
+}

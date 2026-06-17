@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO accounts (id, kind, currency, allow_negative)\n               VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "account_kind",
+            "kind": {
+              "Enum": [
+                "asset",
+                "liability"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "currency",
+            "kind": {
+              "Enum": [
+                "USD"
+              ]
+            }
+          }
+        },
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1e1f4264cb550d7b07704463e35196591ff23bbea6903c145f95525f3dc3b31e"
+}

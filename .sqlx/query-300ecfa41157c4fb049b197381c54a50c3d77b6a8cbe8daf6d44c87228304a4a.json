@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n              COALESCE(SUM(CASE WHEN direction = 'debit'  THEN amount END), 0) AS \"debits!\",\n              COALESCE(SUM(CASE WHEN direction = 'credit' THEN amount END), 0) AS \"credits!\"\n           FROM entries",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "debits!",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 1,
+        "name": "credits!",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "300ecfa41157c4fb049b197381c54a50c3d77b6a8cbe8daf6d44c87228304a4a"
+}

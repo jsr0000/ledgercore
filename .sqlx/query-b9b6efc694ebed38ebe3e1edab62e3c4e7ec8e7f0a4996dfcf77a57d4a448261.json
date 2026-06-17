@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,\n                      kind     AS \"kind: DbAccountKind\",\n                      currency AS \"currency: DbCurrency\",\n                      allow_negative,\n                      balance\n               FROM accounts\n               WHERE id = ANY($1)\n               ORDER BY id\n               FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "kind: DbAccountKind",
+        "type_info": {
+          "Custom": {
+            "name": "account_kind",
+            "kind": {
+              "Enum": [
+                "asset",
+                "liability"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "currency: DbCurrency",
+        "type_info": {
+          "Custom": {
+            "name": "currency",
+            "kind": {
+              "Enum": [
+                "USD"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "allow_negative",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "balance",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b9b6efc694ebed38ebe3e1edab62e3c4e7ec8e7f0a4996dfcf77a57d4a448261"
+}
