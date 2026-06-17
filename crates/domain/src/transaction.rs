@@ -257,4 +257,84 @@ mod tests {
         ];
         Transaction::new(tx_id(), key(), entries, at()).unwrap();
     }
+
+    // Property tests for INV1. The hand-picked tests above pin specific
+    // cases; these confirm the invariant holds across a randomised input
+    // space and that the rejection error is the right variant.
+    mod proptest_inv1 {
+        use super::*;
+        use proptest::prelude::*;
+
+        // Mantissa 1..10_000_000 and scale 0..=4 keep sums well within
+        // Decimal range and shrink to small, legible counter-examples.
+        fn positive_decimal() -> impl Strategy<Value = Decimal> {
+            (1i64..10_000_000, 0u32..=4).prop_map(|(m, s)| Decimal::new(m, s))
+        }
+
+        // n debit entries on n distinct accounts + one credit on a fresh
+        // account totalling the debits. n in 2..=10, so the result has
+        // 3..=11 entries on 3..=11 distinct accounts.
+        fn balanced_entries() -> impl Strategy<Value = Vec<Entry>> {
+            (2usize..=10)
+                .prop_flat_map(|n| prop::collection::vec(positive_decimal(), n))
+                .prop_map(|amounts| {
+                    let total: Decimal = amounts.iter().sum();
+                    let n = amounts.len();
+                    let mut entries: Vec<Entry> = amounts
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, amt)| {
+                            Entry::new(
+                                AccountId::new(Uuid::from_u128(i as u128)),
+                                Direction::Debit,
+                                Money::new(amt, Currency::Usd),
+                            )
+                            .unwrap()
+                        })
+                        .collect();
+                    entries.push(
+                        Entry::new(
+                            AccountId::new(Uuid::from_u128(n as u128)),
+                            Direction::Credit,
+                            Money::new(total, Currency::Usd),
+                        )
+                        .unwrap(),
+                    );
+                    entries
+                })
+        }
+
+        // Take a balanced set and perturb the first entry's amount by a
+        // strictly positive delta. The result is guaranteed unbalanced
+        // (debits exceed credits by `delta`).
+        fn unbalanced_entries() -> impl Strategy<Value = Vec<Entry>> {
+            (balanced_entries(), positive_decimal()).prop_map(|(mut entries, delta)| {
+                let first = entries.remove(0);
+                let new_amount = first.amount().amount() + delta;
+                let perturbed = Entry::new(
+                    first.account(),
+                    first.direction(),
+                    Money::new(new_amount, first.amount().currency()),
+                )
+                .unwrap();
+                entries.insert(0, perturbed);
+                entries
+            })
+        }
+
+        proptest! {
+            #[test]
+            fn balanced_random_transactions_are_accepted(entries in balanced_entries()) {
+                Transaction::new(tx_id(), key(), entries, at())
+                    .expect("balanced generator should always produce a valid transaction");
+            }
+
+            #[test]
+            fn unbalanced_random_transactions_are_rejected(entries in unbalanced_entries()) {
+                let err = Transaction::new(tx_id(), key(), entries, at()).unwrap_err();
+                let is_unbalanced = matches!(err, TransactionError::Unbalanced { .. });
+                prop_assert!(is_unbalanced, "expected Unbalanced, got {:?}", err);
+            }
+        }
+    }
 }
