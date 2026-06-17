@@ -1,0 +1,35 @@
+# ledgercore workspace.
+#
+# Members are added milestone by milestone (see docs/DESIGN-M*.md).
+# Don't add a crate here until its milestone is in progress.
+
+[workspace]
+resolver = "2"
+members = ["crates/domain"]
+
+# Centralised dependency versions. Each crate references these via
+# `dep = { workspace = true }` so we pin one version across the workspace.
+[workspace.dependencies]
+rust_decimal = { version = "1", default-features = false, features = ["std"] }
+thiserror = "2"
+time = { version = "0.3", default-features = false, features = ["std", "macros"] }
+uuid = { version = "1", default-features = false, features = ["std", "v4"] }
+
+# Dev-only deps (property tests).
+proptest = "1"
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+publish = false
+
+# Profile tweaks — keep tests fast, release builds reasonable.
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+debug = false

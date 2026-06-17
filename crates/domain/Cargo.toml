@@ -1,0 +1,26 @@
+# Pure domain crate.
+#
+# Invariant: this crate has ZERO IO dependencies. No tokio, no sqlx, no tonic,
+# no clock reads. Time values and ids are passed in by callers. See
+# docs/DESIGN-M0.md §6 for the reasoning.
+
+[package]
+name = "domain"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "ledgercore — pure domain (accounts, money, transactions, INV1)"
+
+[dependencies]
+rust_decimal = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+# rust_decimal's macros feature gives us the `dec!` macro for ergonomic literals
+# in tests. Kept out of the main dep so it doesn't leak into production code.
+rust_decimal_macros = "1"
