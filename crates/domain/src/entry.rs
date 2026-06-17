@@ -1,28 +1,5 @@
-//! `Direction` and `Entry` — the two halves of a posting.
-//!
-//! In double-entry accounting every transaction is a *set* of entries, each
-//! entry touching one account in one direction with a strictly positive
-//! amount. The direction (debit or credit) is *categorical*, not a sign:
-//! whether a debit increases or decreases the account's balance depends on
-//! the account type (asset vs liability), and that rule lives in one place
-//! (M1's balance projection), not smuggled into every plus/minus.
-//!
-//! ## Why `Direction` is an enum, not a `+1 / -1`
-//!
-//! - Reading code: `Direction::Credit` is unambiguous;
-//!   `Decimal::from(-1) * amount` invites the "I forgot to negate" bug.
-//! - The balanced check (INV1) reads textbook-natural as
-//!   `sum(debits) == sum(credits)`.
-//! - Future symmetries — flipping all directions when posting a reversing
-//!   transaction (M1) — are a single method, [`Direction::flip`], rather
-//!   than a scatter of sign flips.
-//!
-//! ## Why `Entry::new` re-validates positivity
-//!
-//! `Money` itself permits zero or negative amounts (balances need that).
-//! An entry's amount, however, must be strictly positive — its sign lives
-//! in [`Direction`]. We forward to `Money::positive` so that the rule has
-//! exactly one source of truth in the crate.
+//! `Direction` and `Entry` — the two halves of a posting. See
+//! `docs/DESIGN-M0.md` §3.5 for why direction is categorical.
 
 use crate::{AccountId, Money, MoneyError};
 
@@ -36,7 +13,7 @@ pub enum Direction {
 }
 
 impl Direction {
-    /// The opposite direction. Used when constructing a reversing transaction.
+    /// The opposite direction. Used when posting a reversing transaction.
     pub const fn flip(self) -> Self {
         match self {
             Direction::Debit => Direction::Credit,
@@ -55,10 +32,7 @@ impl core::fmt::Display for Direction {
 }
 
 /// One side of a posting: an account, a direction, and a positive amount.
-///
-/// Fields are private. `Entry::new` is the only constructor and enforces
-/// the amount-is-positive rule, so it is impossible to hold an `Entry`
-/// whose amount is zero or negative.
+/// Fields are private; the constructor enforces positivity.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Entry {
     account: AccountId,
@@ -67,8 +41,8 @@ pub struct Entry {
 }
 
 impl Entry {
-    /// Construct an entry. The amount must be strictly positive in any
-    /// currency; the sign carrying meaning lives in `direction`.
+    /// Construct an entry. The amount must be strictly positive; the
+    /// sign is carried by `direction`, not by the amount.
     pub fn new(
         account: AccountId,
         direction: Direction,
@@ -76,11 +50,7 @@ impl Entry {
     ) -> Result<Self, EntryError> {
         // Single source of truth for the "positive money" rule.
         Money::positive(amount.amount(), amount.currency())?;
-        Ok(Self {
-            account,
-            direction,
-            amount,
-        })
+        Ok(Self { account, direction, amount })
     }
 
     /// Which account this entry hits.
@@ -88,7 +58,7 @@ impl Entry {
         self.account
     }
 
-    /// Which side of the entry the amount applies to.
+    /// Debit or credit side.
     pub fn direction(&self) -> Direction {
         self.direction
     }
@@ -102,7 +72,7 @@ impl Entry {
 /// Errors raised when constructing an [`Entry`].
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum EntryError {
-    /// Forwarded from `Money::positive`: amount was zero or negative.
+    /// Amount was zero or negative (forwarded from `Money::positive`).
     #[error(transparent)]
     Money(#[from] MoneyError),
 }
@@ -162,15 +132,12 @@ mod tests {
 
     #[test]
     fn entries_equal_when_fields_equal() {
-        // Equality is structural, which the balanced-check and tests both
-        // rely on. Pin it down explicitly.
         let a = Entry::new(
             an_account(),
             Direction::Debit,
             Money::new(dec!(1), Currency::Usd),
         )
         .unwrap();
-        let b = a.clone();
-        assert_eq!(a, b);
+        assert_eq!(a, a.clone());
     }
 }
