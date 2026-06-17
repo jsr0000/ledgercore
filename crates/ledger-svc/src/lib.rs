@@ -11,3 +11,5 @@ pub mod proto {
     #![allow(missing_docs, clippy::all)]
     tonic::include_proto!("ledgercore.v1");
 }
+
+pub mod wire;

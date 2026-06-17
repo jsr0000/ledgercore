@@ -41,5 +41,8 @@ tracing-subscriber = { workspace = true }
 
 anyhow = { workspace = true }
 
+[dev-dependencies]
+rust_decimal_macros = "1"
+
 [build-dependencies]
 tonic-build = { workspace = true }
