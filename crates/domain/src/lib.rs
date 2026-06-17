@@ -10,9 +10,11 @@
 mod entry;
 mod ids;
 mod money;
+mod transaction;
 
 pub use entry::{Direction, Entry, EntryError};
 pub use ids::{
     AccountId, IdempotencyKey, IdempotencyKeyError, TransactionId, IDEMPOTENCY_KEY_MAX_LEN,
 };
 pub use money::{Currency, Money, MoneyError};
+pub use transaction::{Transaction, TransactionError};
