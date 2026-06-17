@@ -7,9 +7,11 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
+mod entry;
 mod ids;
 mod money;
 
+pub use entry::{Direction, Entry, EntryError};
 pub use ids::{
     AccountId, IdempotencyKey, IdempotencyKeyError, TransactionId, IDEMPOTENCY_KEY_MAX_LEN,
 };
