@@ -12,4 +12,8 @@ pub mod proto {
     tonic::include_proto!("ledgercore.v1");
 }
 
+pub mod service;
+pub mod status;
 pub mod wire;
+
+pub use service::LedgerService;
