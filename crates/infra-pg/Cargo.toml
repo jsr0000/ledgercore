@@ -1,0 +1,24 @@
+# Postgres adapter implementing the `app::LedgerRepo` port. Owns the
+# sqlx + tokio dependencies so the pure crates (`domain`, `app`) stay
+# IO-free.
+
+[package]
+name = "infra-pg"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "ledgercore — Postgres adapter for the ledger ports"
+
+[dependencies]
+domain = { path = "../domain" }
+app = { path = "../app" }
+async-trait = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true }
+uuid = { workspace = true }
+rust_decimal = { workspace = true }
+tracing = { workspace = true }

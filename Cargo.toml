@@ -5,7 +5,7 @@
 
 [workspace]
 resolver = "2"
-members = ["crates/domain", "crates/app"]
+members = ["crates/domain", "crates/app", "crates/infra-pg"]
 
 # Centralised dependency versions. Each crate references these via
 # `dep = { workspace = true }` so we pin one version across the workspace.
@@ -15,6 +15,19 @@ thiserror = "2"
 time = { version = "0.3", default-features = false, features = ["std", "macros"] }
 uuid = { version = "1", default-features = false, features = ["std", "v4"] }
 async-trait = "0.1"
+
+# IO / runtime deps for adapter crates only.
+tokio = { version = "1", default-features = false, features = ["rt-multi-thread", "macros", "sync", "signal"] }
+sqlx = { version = "0.8", default-features = false, features = [
+    "postgres",
+    "runtime-tokio",
+    "macros",
+    "migrate",
+    "rust_decimal",
+    "time",
+    "uuid",
+] }
+tracing = { version = "0.1", default-features = false, features = ["std"] }
 
 # Dev-only deps (property tests).
 proptest = "1"
