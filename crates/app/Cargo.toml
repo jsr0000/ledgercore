@@ -15,3 +15,4 @@ description = "ledgercore — application ports + use-cases"
 domain = { path = "../domain" }
 async-trait = { workspace = true }
 thiserror = { workspace = true }
+time = { workspace = true }

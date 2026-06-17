@@ -7,5 +7,7 @@
 #![warn(missing_docs, rust_2018_idioms)]
 
 mod ledger;
+mod ports;
 
 pub use ledger::{LedgerError, LedgerRepo};
+pub use ports::{Clock, IdGen};
