@@ -1,0 +1,80 @@
+// ledgercore — Ledger service. See docs/DESIGN-M2.md §3.
+
+syntax = "proto3";
+
+package ledgercore.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service Ledger {
+  rpc PostTransaction   (PostTransactionRequest)   returns (PostTransactionResponse);
+  rpc GetBalance        (GetBalanceRequest)        returns (GetBalanceResponse);
+  rpc GetAccountHistory (GetAccountHistoryRequest) returns (GetAccountHistoryResponse);
+}
+
+// proto3 convention: 0 is reserved for "unset". The server rejects any
+// UNSPECIFIED enum it receives with INVALID_ARGUMENT.
+enum Direction {
+  DIRECTION_UNSPECIFIED = 0;
+  DIRECTION_DEBIT       = 1;
+  DIRECTION_CREDIT      = 2;
+}
+
+enum Currency {
+  CURRENCY_UNSPECIFIED = 0;
+  CURRENCY_USD         = 1;
+}
+
+// Decimal as a string (e.g. "100.00"). proto3 has no exact-decimal type;
+// `double` would lose precision and a `bytes`-encoded big-decimal is
+// opaque to non-Rust clients. The string round-trips through every
+// language and through logs.
+message Money {
+  string   amount   = 1;
+  Currency currency = 2;
+}
+
+message Entry {
+  // UUID as string. 4 bytes more than `bytes`, infinitely more readable
+  // in logs and on the wire.
+  string    account_id = 1;
+  Direction direction  = 2;
+  Money     amount     = 3;
+}
+
+message PostTransactionRequest {
+  // Caller-supplied dedupe token. Required.
+  string idempotency_key = 1;
+
+  // The postings. Must balance, must touch >= 2 distinct accounts.
+  repeated Entry entries = 2;
+
+  // Optional. If unset, the server stamps with Clock::now() at request
+  // time. Set this for backdated/retroactive posts.
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message PostTransactionResponse {
+  // Server-assigned on a first post; the ORIGINAL id on an idempotent
+  // replay. The client cannot distinguish the two — that's INV6.
+  string transaction_id = 1;
+}
+
+message GetBalanceRequest {
+  string account_id = 1;
+}
+
+message GetBalanceResponse {
+  Money balance = 1;
+}
+
+message GetAccountHistoryRequest {
+  string account_id = 1;
+
+  // Newest first. Server caps the effective limit if requested too high.
+  uint32 limit = 2;
+}
+
+message GetAccountHistoryResponse {
+  repeated Entry entries = 1;
+}
