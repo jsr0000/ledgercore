@@ -1,0 +1,9 @@
+CLAUDE.md
+
+# Rust / Cargo
+/target
+**/*.rs.bk
+*.pdb
+
+# macOS
+.DS_Store
