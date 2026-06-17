@@ -1,0 +1,17 @@
+# Application layer: port traits and use-cases. Depends only on `domain`
+# and the bare minimum to express async traits — no sqlx, no tokio
+# runtime, no IO. Adapters live in infra-* crates.
+
+[package]
+name = "app"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "ledgercore — application ports + use-cases"
+
+[dependencies]
+domain = { path = "../domain" }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
